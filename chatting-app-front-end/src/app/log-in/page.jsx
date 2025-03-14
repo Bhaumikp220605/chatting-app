@@ -17,22 +17,27 @@ export default function Login() {
         setLoading(true);
         setError("");
 
-        const response = await fetchApi({
-            url: Constants.API_ENDPOINTS.LOGIN,
-            method: "POST",
-            data: { user_email, user_password },
-            isAuthRequired: false
-        });
+        try {
+            const response = await fetchApi({
+                url: Constants.API_ENDPOINTS.LOGIN,
+                method: "POST",
+                data: { user_email, user_password },
+                isAuthRequired: false
+            });
 
-        if (response.status === 200) {
-            localStorage.setItem("token", response.token);
-            localStorage.setItem("userData", JSON.stringify(response.data));
-            router.push("/groups");
-        } else {
-            setError(response?.message || "Login failed!");
+            if (response.status === 200) {
+                localStorage.setItem("token", response.token);
+                localStorage.setItem("userData", JSON.stringify(response.data));
+                router.push("/groups");
+            } else {
+                setError(response?.message || "Login failed!");
+            }
+        } catch (error) {
+
+        } finally {
+            setLoading(false);
         }
 
-        setLoading(false);
     };
 
     return (
