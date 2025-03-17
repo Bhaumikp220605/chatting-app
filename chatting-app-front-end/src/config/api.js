@@ -7,6 +7,9 @@ const API_ENDPOINTS = {
 
     GET_GROUP: `${BASE_URL}/get-group`,
     GET_MESSAGE: `${BASE_URL}/get-message`,
+
+    JOIN_GROUP: `${BASE_URL}/join-group`,
+    CREATE_GROUP: `${BASE_URL}/create-group`,
 };
 
 const ROUTES = {

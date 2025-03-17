@@ -4,11 +4,16 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import fetchApi from "@/utils/helper";
 import Constants from "@/config/api";
+import Modal from "react-modal";
+
+// Modal.setAppElement("#root");
 
 export default function GroupsList() {
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [modalType, setModalType] = useState(null);
+    const [groupName, setGroupName] = useState("");
     const router = useRouter();
 
     useEffect(() => {
@@ -18,9 +23,9 @@ export default function GroupsList() {
     const fetchGroups = async () => {
         try {
             const response = await fetchApi({
-                url: Constants.API_ENDPOINTS.GET_GROUP, // Replace with actual API URL
+                url: Constants.API_ENDPOINTS.GET_GROUP,
                 method: "GET",
-                isAuthRequired: true, // If auth is required
+                isAuthRequired: true,
             });
 
             if (response.status === 200) {
@@ -34,24 +39,45 @@ export default function GroupsList() {
         setLoading(false);
     };
 
-    // const openGroupChat = (groupId) => {
-    //     router.push(`/group/${groupId}`);
-    // };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!groupName.trim()) return;
+
+        const apiEndpoint = modalType === "join" ? Constants.API_ENDPOINTS.JOIN_GROUP : Constants.API_ENDPOINTS.CREATE_GROUP;
+
+        try {
+            const response = await fetchApi({
+                url: apiEndpoint,
+                method: "POST",
+                isAuthRequired: true,
+                data: { name: groupName },
+            });
+
+            if (response.status === 200) {
+                fetchGroups();
+                setModalType(null);
+                setGroupName("");
+            } else {
+                alert(response.message || "Something went wrong!");
+            }
+        } catch (err) {
+            alert("Request failed, try again.");
+        }
+    };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
+        <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6" id="root">
             <h2 className="text-2xl font-bold mb-4">Your Groups</h2>
 
-            {/* Buttons for Joining & Creating Groups */}
             <div className="flex space-x-4 mb-6">
                 <button
-                    // onClick={() => router.push("/join-group")}
+                    onClick={() => setModalType("join")}
                     className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300"
                 >
                     Join Group
                 </button>
                 <button
-                    // onClick={() => router.push("/create-group")}
+                    onClick={() => setModalType("create")}
                     className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300"
                 >
                     Create Group
@@ -80,6 +106,40 @@ export default function GroupsList() {
                     </div>
                 ))}
             </div>
+
+            {/* Modal for Join/Create Group */}
+            <Modal
+                isOpen={modalType !== null}
+                onRequestClose={() => setModalType(null)}
+                className="bg-white p-6 rounded-lg shadow-lg max-w-md mx-auto mt-20"
+                // overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+            >
+                <h2 className="text-xl font-semibold mb-4">{modalType === "join" ? "Join a Group" : "Create a Group"}</h2>
+                <form onSubmit={handleSubmit}>
+                    <input
+                        type="text"
+                        value={groupName}
+                        onChange={(e) => setGroupName(e.target.value)}
+                        placeholder="Enter group name"
+                        className="w-full p-2 border rounded-md mb-4 focus:outline-none"
+                    />
+                    <div className="flex justify-end space-x-2">
+                        <button
+                            type="button"
+                            onClick={() => setModalType(null)}
+                            className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-500"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                        >
+                            {modalType === "join" ? "Join" : "Create"}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
         </div>
     );
 }

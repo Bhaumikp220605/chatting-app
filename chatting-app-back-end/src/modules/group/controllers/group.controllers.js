@@ -17,6 +17,22 @@ const createNewGroup = async (req, res) => {
     }
 }
 
+const joinGroup = async (req, res) => {
+    try {
+        const { name } = req.body;
+
+        const newGroup = await Group.findOneAndUpdate(
+            { name },
+            { $push: { members: req.user.id } },
+            { new: true }
+        );
+
+        successResponse({ res, message: "Group joined successfully" })
+    } catch (error) {
+        errorResponse(res);
+    }
+}
+
 const getGroups = async (req, res) => {
     try {
         const allGroup = await Group.find({});
@@ -38,5 +54,5 @@ const getGroupById = async (req, res) => {
 }
 
 module.exports = {
-    createNewGroup, getGroups, getGroupById
+    createNewGroup, getGroups, getGroupById, joinGroup
 }
