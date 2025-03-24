@@ -46,7 +46,7 @@ export default function GroupsList() {
         const apiEndpoint = modalType === "join" ? Constants.API_ENDPOINTS.JOIN_GROUP : Constants.API_ENDPOINTS.CREATE_GROUP;
 
         try {
-            const response = await fetchApi({
+            const response = await fetchApi({ 
                 url: apiEndpoint,
                 method: "POST",
                 isAuthRequired: true,
